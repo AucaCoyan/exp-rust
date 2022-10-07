@@ -10,15 +10,21 @@ For input [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, -11, -12, -13, -14, -15], you should r
 */
 
 fn count_positives_sum_negatives(input: Vec<i32>) -> Vec<i32> {
-    let mut result: Vec<i32> = vec![0, 0];
-    for number in input {
-        if number > 0 {
-            result[0] = result[0] + 1
-        } else if number < 0 {
-            result[1] = result[1] + number
+    // count if input has less than 1 value
+    if input.len() == 0 {
+        return vec![];
+    } else {
+        // the list has at least 1 value
+        let mut result: Vec<i32> = vec![0, 0];
+        for number in input {
+            if number > 0 {
+                result[0] = result[0] + 1
+            } else if number < 0 {
+                result[1] = result[1] + number
+            }
         }
+        return result;
     }
-    return result;
 }
 
 fn main() {
