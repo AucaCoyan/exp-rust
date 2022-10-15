@@ -1,30 +1,31 @@
 use std::io::stdin;
+/*
+struct Box {
+    contents: String,
+    id: u32,
+}
 
 enum Response {
     Quit,
     Edit,
     Print,
 }
-
+*/
 fn main() {
     println!("Welcome to");
 
-    let mut exit = false;
-    let mut input = String::new();
+    let exit = false;
+    let mut buffer = String::new();
 
     while exit == false {
         println!();
         println!("Box simulator 1.0");
-        match stdin().read_line(&mut input) {
-            Ok(n) => {
-                let select = n;
-            }
-            Err(e) => {
-                println!("something has gone wrong")
-            }
-        }
-        print!("{}", &n)
-    }
+        stdin().read_line(&mut buffer);
+        let res = match buffer.trim_end() {
+            "q" => println!("you pressed q"),
+            _ => println!("something has gone wrong"),
+        };
 
-    exit = false
+        println!("{:?}", res)
+    }
 }
