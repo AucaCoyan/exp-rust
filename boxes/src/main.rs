@@ -11,7 +11,18 @@ enum Response {
     Print,
 }
 */
+
 fn main() {
+    let mut response = String::new();
+
+    println!("type sth: ");
+
+    stdin().read_line(&mut response).expect("Failed input");
+
+    println!("you wrote {}", response)
+}
+
+/*
     println!("Welcome to");
 
     let exit = false;
@@ -29,3 +40,4 @@ fn main() {
         println!("{:?}", res)
     }
 }
+*/
