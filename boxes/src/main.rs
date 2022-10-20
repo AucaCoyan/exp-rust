@@ -31,6 +31,10 @@ fn main() {
             IntErrorKind::PosOverflow => panic!("You can't pick a number greater than 65 535"),
             IntErrorKind::NegOverflow => panic!("You can't pick a number less than 0"),
             IntErrorKind::Empty => panic!("I read an empty value"),
+            IntErrorKind::InvalidDigit => {
+                println!("this is the error {}", error); // this line returns 'invalid digit found in string', it doesn't return the original response
+                panic!("this is not a digit!")
+            }
             other_error => {
                 panic!("Something wrong has happened: {:?}", other_error)
             }
