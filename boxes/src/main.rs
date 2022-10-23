@@ -1,4 +1,4 @@
-use std::{io::stdin, num::IntErrorKind};
+use std::{fmt::Error, io::stdin, num::IntErrorKind};
 /*
 struct Box {
     contents: String,
@@ -12,10 +12,7 @@ enum Response {
 }
 */
 
-fn main() {
-    println!("Welcome to");
-    println!("Box simulator 1.0");
-
+fn pick_number() -> Result<u16, Error> {
     let mut response = String::new();
 
     println!("Write the box number: \n(between 0 and 65 535)");
@@ -40,8 +37,16 @@ fn main() {
             }
         },
     };
+    Ok(tiny_box)
+}
 
-    println!("you chose {:?}", tiny_box)
+fn main() {
+    println!("Welcome to");
+    println!("Box simulator 1.0");
+
+    loop {
+        println!("{:?}", pick_number());
+    }
 }
 
 /*
