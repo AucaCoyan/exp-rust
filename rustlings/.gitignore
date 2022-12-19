@@ -1,4 +1,5 @@
 *.swp
+*.exe
 target/
 **/*.rs.bk
 .DS_Store
