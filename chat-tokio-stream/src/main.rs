@@ -9,11 +9,13 @@ async fn main() {
 
     let (mut socket, _addr) = listener.accept().await.unwrap();
 
-    // write a buffer of 1kb length
-    let mut buffer = [0u8; 1024];
+    loop {
+        // write a buffer of 1kb length
+        let mut buffer = [0u8; 1024];
 
-    let bytes_read = socket.read(&mut buffer).await.unwrap();
+        let bytes_read = socket.read(&mut buffer).await.unwrap();
 
-    // write all the bytes
-    socket.write_all(&buffer[..bytes_read]).await.unwrap();
+        // write all the bytes
+        socket.write_all(&buffer[..bytes_read]).await.unwrap();
+    }
 }
