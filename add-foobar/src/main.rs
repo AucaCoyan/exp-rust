@@ -13,14 +13,16 @@ fn main() {
     // total of arguments
     // and PID of the process
     let name_of_app = env!("CARGO_PKG_NAME");
-    let args = "0";
+    let args_count: usize = env::args().count();
     let pid = process::id();
 
-    println!("Running the program {name_of_app}, with {args} arguments with PID {pid}");
-    print_arguments()
-}
+    println!("Running the program {name_of_app}, with {args_count} arguments with PID {pid}");
 
-fn print_arguments() {
+    // recieve the arguments
     let args: Vec<String> = env::args().collect();
-    dbg!(args);
+
+    // run the for loop for every argument passed
+    for (item, arg) in args.iter().enumerate() {
+        println!("The argument is {item} and the arg is: '{arg}'");
+    }
 }
