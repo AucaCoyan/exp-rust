@@ -24,5 +24,20 @@ fn main() {
     // run the for loop for every argument passed
     for (item, arg) in args.iter().enumerate() {
         println!("The argument is {item} and the arg is: '{arg}'");
+        // run the command
+        let output = process::Command::new("rg")
+            .args(["foobar", arg.as_str()])
+            .output()
+            .expect("something has gone wrong");
+
+        // I need to convert the output from ASCI extended to normal characters
+        // so transform the type Vec<u8, Global> into &[u8]
+        let output_transformed = output.stdout.as_slice();
+
+        // read the bytes into a strig
+        let result = String::from_utf8_lossy(output_transformed);
+
+        // read the result
+        println!("{result:?}")
     }
 }
