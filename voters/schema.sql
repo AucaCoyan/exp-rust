@@ -1,0 +1,21 @@
+CREATE TABLE users IF NOT EXITS (
+  id INTEGRER AUTO_INCREMENT,
+  username TEXT UNIQUE NULL UNIQUE,
+
+);
+
+CREATE TABLE IF NOT EXISTS items (
+  id INTEGRER AUTO_INCREMENT,
+  title TEXT NOT NULL,
+  body TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS votes (
+  user_id INTEGRER NOT NULL,
+  item_id INTEGRER NOT NULL,
+  ordinal INTEGRER NOT NULL
+
+  CONSTRAINT no_dup_votes UNIQUE (user_id, item_id)
+  FOREIGN KEY(user_id) REFERENCES users(id)
+  FOREIGN KEY(item_id) REFERENCES items(id)
+);
