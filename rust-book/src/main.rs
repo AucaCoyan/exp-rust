@@ -1,43 +1,52 @@
-struct Rectangle {
-    width: u32,
-    height: u32,
+#![allow(unused)]
+
+use std::str::FromStr;
+
+struct QuitMessage; // unit struct
+struct MoveMessage {
+    x: i32,
+    y: i32,
+}
+#[derive(Debug)]
+struct WriteMessage {
+    string: String,
+    id: u128,
+} // full struct
+struct ChangeColorMessage(i32, i32, i32); // tuple struct
+
+#[derive(Debug)]
+enum MessageType {
+    QuitMsg,
+    MoveMsg,
+    ChatMsg { content: String, id: u128 },
+    ChangeColorMsg,
 }
 
-impl Rectangle {
-    fn area(&self) -> u32 {
-        self.width * self.height
-    }
-
-    fn can_hold(&self, other: &Rectangle) -> bool {
-        self.width > other.width && self.height > other.height
-    }
+#[derive(Debug)]
+struct Message {
+    _type: MessageType,
 }
 
-impl Rectangle {
-    fn new_square(size: u32) -> Self {
+enum Option {
+    None,
+    Some,
+}
+
+impl Message {
+    fn new(mess_type: String) -> Self {
         Self {
-            width: size,
-            height: size,
+            _type: MessageType::ChatMsg {
+                content: mess_type,
+                id: 1,
+            },
         }
     }
 }
 fn main() {
-    let rect1 = Rectangle {
-        width: 30,
-        height: 50,
-    };
+    let var = Option::Some;
 
-    let rect2 = Rectangle {
-        width: 40,
-        height: 50,
-    };
+    let content = String::from("Mi contenido de mensaje");
+    let my_mes = Message::new(String::from("Mi Mensaje"));
 
-    let square = Rectangle::new_square(2);
-
-    println!(
-        "The area of the rectangle is {} square pixels",
-        rect1.area()
-    );
-
-    println!("Can rect1 hold rect 2? {}", rect1.can_hold(&rect2));
+    println!("Mi mensaje: {:?}", my_mes)
 }
