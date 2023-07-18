@@ -1,0 +1,8 @@
+[package]
+name = "sqlite_sample"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.29.1", features = ["full"] }
+sqlx = { version = "0.7.1", features = ["runtime-tokio-rustls", "postgres"] }
