@@ -1,21 +1,22 @@
 fn dna_strand(dna: &str) -> String {
-    let adn = dna.to_string();
+    let mut output = String::new();
 
-    let f: Vec<char> = adn.chars().collect();
-    println!("{:?}", f);
-    loop {
-        f.remove(0)
-    }
-    for letter in f.iter() {
+    let dna_chars: Vec<char> = dna.chars().collect();
+    println!("{:?}", dna_chars);
+
+    for letter in dna_chars.iter() {
         println!("{}", letter);
-        match  {
-            
-        }
+        let complementary_letter = match letter {
+            'A' => 'T',
+            'T' => 'A',
+            'G' => 'C',
+            'C' => 'G',
+            _ => ' ',
+        };
+        output.push(complementary_letter)
     }
-    /*     match f.iter() {
-        'A' => return 'A',
-    } */
-    return String::new();
+
+    output
 }
 
 fn main() {
