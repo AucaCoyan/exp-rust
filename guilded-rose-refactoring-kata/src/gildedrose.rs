@@ -92,11 +92,20 @@ mod tests {
     use super::{GildedRose, Item};
 
     #[test]
-    pub fn foo() {
+    pub fn new_item_doesnt_change_name() {
         let items = vec![Item::new("foo", 0, 0)];
         let mut rose = GildedRose::new(items);
         rose.update_quality();
 
-        assert_eq!("fixme", rose.items[0].name);
+        assert_eq!("foo", rose.items[0].name);
+    }
+
+    #[test]
+    fn test_sulfuras() {
+        let sulfuras = vec![Item::new("Sulfuras, Hand of Ragnaros", 0, 0)];
+        let mut rose = GildedRose::new(sulfuras);
+        rose.update_quality();
+
+        assert_eq!("Sulfuras", rose.items[0].name);
     }
 }
