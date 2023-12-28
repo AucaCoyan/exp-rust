@@ -1,6 +1,23 @@
 #![allow(unused)]
+
+use std::fmt::format;
+
+trait Summary {
+    fn summarize(&self) -> String;
+}
+
+pub struct NewsArticle {
+    pub headline: String,
+    pub location: String,
+    pub author: String,
+    pub content: String,
+}
+
+impl Summary for NewsArticle {
+    fn summarize(&self) -> String {
+        format!("{}, by {} ({})", self.headline, self.author, self.location)
+    }
+}
 fn main() {
-    let may_have_value_1: Option<i32> = Some(10);
-    let may_have_value_2: Option<i32> = Some(20);
-    println!("{}", may_have_value_1 + may_have_value_2)
+    println!("hello there!");
 }
