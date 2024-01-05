@@ -56,6 +56,14 @@ impl Solution {
                 vec_idx = 0;
             }
         }
+        // for the last item, check if it's greater than the previous
+        // if so, sum 1
+
+        if nums.len() > 2 && nums.last().unwrap() > &nums[nums.len() - 2] {
+            let length = vec_len.len();
+            vec_len[length - 1] += 1;
+        }
+        println!("{:?}", &vec_len);
         let result = *vec_len.iter().max().unwrap();
         result
     }
