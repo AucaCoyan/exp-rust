@@ -1,3 +1,5 @@
+use log::info;
+
 pub struct Solution {}
 
 // Constraints:
@@ -31,6 +33,7 @@ impl Solution {
         let mut vec_idx = 0;
         let mut peekable = nums.iter().peekable();
         while let Some(number) = peekable.next() {
+            info!("{:?}", number);
             if number < peekable.next().unwrap() {
                 vec_len[vec_idx] += 1;
             } else {
@@ -45,26 +48,27 @@ impl Solution {
     // there is another method from itertools called `windows(n)`
     // which gives you a block of `n` numbers
     pub fn length_of_lis(nums: Vec<i32>) -> i32 {
-        let mut vec_len: Vec<i32> = vec![1];
+        let mut subsequence_length: Vec<i32> = vec![1];
         let mut vec_idx = 0;
         for number in nums.windows(2) {
             // you don't need to check if the next value is some! 🙌
             if number[0] < number[1] {
-                vec_len[vec_idx] += 1;
+                subsequence_length[vec_idx] += 1;
             } else {
-                vec_len.push(1);
-                vec_idx = 0;
+                subsequence_length.push(1);
+                vec_idx += 1;
             }
         }
         // for the last item, check if it's greater than the previous
         // if so, sum 1
 
         if nums.len() > 2 && nums.last().unwrap() > &nums[nums.len() - 2] {
-            let length = vec_len.len();
-            vec_len[length - 1] += 1;
+            let length = subsequence_length.len();
+            info!("{:?}", &subsequence_length);
+            subsequence_length[length - 1] += 1;
         }
-        println!("{:?}", &vec_len);
-        let result = *vec_len.iter().max().unwrap();
+        info!("{:?}", &subsequence_length);
+        let result = *subsequence_length.iter().max().unwrap();
         result
     }
 }
