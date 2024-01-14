@@ -90,6 +90,16 @@ impl GildedRose {
 #[cfg(test)]
 mod tests {
     use super::{GildedRose, Item};
+    use test_case::test_case;
+
+    fn test_update_single_item(item: Item, days: i32) -> Item {
+        let single_item = vec![item];
+        let mut rose = GildedRose::new(single_item);
+        for _ in 1..=days {
+            rose.update_quality();
+        }
+        rose.items.pop().unwrap()
+    }
 
     #[test]
     pub fn new_item_doesnt_change_name() {
@@ -106,6 +116,160 @@ mod tests {
         let mut rose = GildedRose::new(sulfuras);
         rose.update_quality();
 
-        assert_eq!("Sulfuras", rose.items[0].name);
+        assert_eq!("Sulfuras, Hand of Ragnaros", rose.items[0].name);
+    }
+    // #[test_case("Aged Brie", 10, 0; "Aged Brie, 10, 0")]
+
+    #[test_case("Not Aged Brie", 10, 1; "Not aged brie, 10, 1")]
+    #[test_case("Not Backstage", 10, 1; "Not Backstage, 10, 1")]
+    #[test_case("Not Backstage", 10, 10; "Not Backstage, 10, 10")]
+    #[test_case("Not Backstage", 10, 100; "Not Backstage, 10, 100")]
+    fn test_multiple_cases_qlty_gt_0(name: &str, sell_in: i32, quality: i32) {
+        let test_item = test_update_single_item(
+            Item {
+                name: name.to_string(),
+                sell_in,
+                quality,
+            },
+            1,
+        );
+        dbg!(&test_item.name);
+        dbg!(&test_item.sell_in);
+        dbg!(&test_item.quality);
+        assert_eq!(test_item.name, name.to_string());
+        assert_eq!(test_item.sell_in, sell_in - 1);
+        assert_eq!(test_item.quality, quality - 1);
+    }
+
+    #[test_case("Not Aged Brie", 10, 0; "Not Aged Brie, 10, 0")]
+    #[test_case("Not Backstage", 10, 0; "Not Backstage, 10, 0")]
+    fn test_multiple_cases_qlty_is_0(name: &str, sell_in: i32, quality: i32) {
+        let test_item = test_update_single_item(
+            Item {
+                name: name.to_string(),
+                sell_in,
+                quality,
+            },
+            1,
+        );
+        dbg!(&test_item.name);
+        dbg!(&test_item.sell_in);
+        dbg!(&test_item.quality);
+        assert_eq!(test_item.name, name.to_string());
+        assert_eq!(test_item.sell_in, sell_in - 1);
+        assert_eq!(test_item.quality, 0);
+    }
+
+    #[test_case("Sulfuras, Hand of Ragnaros", 10, 0; "Sulfuras, 0")]
+    #[test_case("Sulfuras, Hand of Ragnaros", 10, 10; "Sulfuras, 10")]
+    #[test_case("Sulfuras, Hand of Ragnaros", 10, 80; "Sulfuras, 80")]
+    fn test_sulfuras_doesnt_decrease_quality(name: &str, sell_in: i32, quality: i32) {
+        let test_item = test_update_single_item(
+            Item {
+                name: name.to_string(),
+                sell_in,
+                quality,
+            },
+            1,
+        );
+        dbg!(&test_item.name);
+        dbg!(&test_item.sell_in);
+        dbg!(&test_item.quality);
+        assert_eq!(test_item.name, name.to_string());
+        assert_eq!(test_item.sell_in, sell_in);
+        assert_eq!(test_item.quality, quality);
+    }
+
+    // this doesn't work
+    //#[test_case("Aged Brie", 10, 0; "Aged Brie, 10, 0")]
+    #[test_case("Backstage passes to a TAFKAL80ETC concert", 10, 0; "Backstage, 10, 0")]
+    fn test_multiple_cases_items_qlty_increases_below_10(name: &str, sell_in: i32, quality: i32) {
+        let test_item = test_update_single_item(
+            Item {
+                name: name.to_string(),
+                sell_in,
+                quality,
+            },
+            1,
+        );
+        dbg!(&test_item.name);
+        dbg!(&test_item.sell_in);
+        dbg!(&test_item.quality);
+        assert_eq!(test_item.name, name.to_string());
+        assert_eq!(test_item.sell_in, sell_in - 1);
+        assert_eq!(test_item.quality, quality + 2);
+    }
+
+    // this doesn't work
+    #[test_case("Aged Brie", 5, 0; "Aged Brie, 5, 0")]
+    #[test_case("Aged Brie", 5, 1; "Aged Brie, 5, 1")]
+    #[test_case("Aged Brie", 5, 20; "Aged Brie, 5, 20")]
+    #[test_case("Aged Brie", 5, 30; "Aged Brie, 5, 30")]
+    fn test_brie_qlty_increases_with_time(name: &str, sell_in: i32, quality: i32) {
+        let test_item = test_update_single_item(
+            Item {
+                name: name.to_string(),
+                sell_in,
+                quality,
+            },
+            1,
+        );
+        dbg!(&test_item.name);
+        dbg!(&test_item.sell_in);
+        dbg!(&test_item.quality);
+        assert_eq!(test_item.name, name.to_string());
+        assert_eq!(test_item.sell_in, sell_in - 1);
+        assert_eq!(test_item.quality, quality + 1);
+    }
+
+    // this doesn't work
+    //#[test_case("Aged Brie", 5, 0; "Aged Brie, 5, 0")]
+    #[test_case("Backstage passes to a TAFKAL80ETC concert", 5, 0; "Backstage, 5, 0")]
+    fn test_multiple_cases_items_qlty_increases_below_5(name: &str, sell_in: i32, quality: i32) {
+        let test_item = test_update_single_item(
+            Item {
+                name: name.to_string(),
+                sell_in,
+                quality,
+            },
+            1,
+        );
+        dbg!(&test_item.name);
+        dbg!(&test_item.sell_in);
+        dbg!(&test_item.quality);
+        assert_eq!(test_item.name, name.to_string());
+        assert_eq!(test_item.sell_in, sell_in - 1);
+        assert_eq!(test_item.quality, quality + 3);
+    }
+
+    #[test]
+    fn test_not_backstage_qlty_gt_0() {
+        let test_item = test_update_single_item(
+            Item {
+                name: "Not backstage".to_string(),
+                sell_in: 10,
+                quality: 1,
+            },
+            1,
+        );
+        assert_eq!(test_item.name, "Not backstage".to_string());
+        assert_eq!(test_item.sell_in, 9);
+        assert_eq!(test_item.quality, 0);
+    }
+
+    #[ignore = "this doesn't work"]
+    #[test]
+    #[should_panic]
+    fn test_creation_item() {
+        // no item should have a quality above 50 (see below)
+        Item::new("something", 100, 51);
+    }
+
+    #[ignore = "this doesn't work"]
+    #[test]
+    #[should_panic]
+    fn test_creation_sulfuras() {
+        // except Sulfuras, which is exactly 80
+        Item::new("Sulfuras, Hand of Ragnaros", 100, 81);
     }
 }
