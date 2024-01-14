@@ -9,7 +9,20 @@ pub struct Item {
 }
 
 impl Item {
-    pub fn new(name: impl Into<String>, sell_in: i32, quality: i32) -> Item {
+    pub fn new(name: &str, sell_in: i32, quality: i32) -> Item {
+        assert!(
+            quality > 0,
+            "An item with negative quality cannot be created!"
+        );
+        if name == SULFURAS {
+            assert!(quality == 80, "Sulfuras can only have quality equal to 80");
+        } else {
+            assert!(
+                quality <= 50,
+                "Normal item cannot be created with quality greater than 50"
+            );
+        }
+
         Item {
             name: name.into(),
             sell_in,
@@ -87,6 +100,8 @@ impl GildedRose {
 
 #[cfg(test)]
 mod tests {
+    use crate::gildedrose::{BRIE, CONCERT, SULFURAS};
+
     use super::{GildedRose, Item};
     use test_case::test_case;
 
@@ -101,7 +116,7 @@ mod tests {
 
     #[test]
     pub fn new_item_doesnt_change_name() {
-        let items = vec![Item::new("foo", 0, 0)];
+        let items = vec![Item::new("foo", 0, 1)];
         let mut rose = GildedRose::new(items);
         rose.update_quality();
 
@@ -110,11 +125,11 @@ mod tests {
 
     #[test]
     fn test_sulfuras_name() {
-        let sulfuras = vec![Item::new("Sulfuras, Hand of Ragnaros", 0, 0)];
+        let sulfuras = vec![Item::new(SULFURAS, 0, 80)];
         let mut rose = GildedRose::new(sulfuras);
         rose.update_quality();
 
-        assert_eq!("Sulfuras, Hand of Ragnaros", rose.items[0].name);
+        assert_eq!(SULFURAS, rose.items[0].name);
     }
     // #[test_case("Aged Brie", 10, 0; "Aged Brie, 10, 0")]
 
@@ -158,9 +173,9 @@ mod tests {
         assert_eq!(test_item.quality, 0);
     }
 
-    #[test_case("Sulfuras, Hand of Ragnaros", 10, 0; "Sulfuras, 0")]
-    #[test_case("Sulfuras, Hand of Ragnaros", 10, 10; "Sulfuras, 10")]
-    #[test_case("Sulfuras, Hand of Ragnaros", 10, 80; "Sulfuras, 80")]
+    #[test_case(SULFURAS, 10, 0; "Sulfuras, 0")]
+    #[test_case(SULFURAS, 10, 10; "Sulfuras, 10")]
+    #[test_case(SULFURAS, 10, 80; "Sulfuras, 80")]
     fn test_sulfuras_doesnt_decrease_quality(name: &str, sell_in: i32, quality: i32) {
         let test_item = test_update_single_item(
             Item {
@@ -178,7 +193,7 @@ mod tests {
         assert_eq!(test_item.quality, quality);
     }
 
-    #[test_case("Backstage passes to a TAFKAL80ETC concert", 10, 0; "Backstage, 10, 0")]
+    #[test_case(CONCERT, 10, 0; "Backstage, 10, 0")]
     fn test_backstage_qlty_increases_below_10(name: &str, sell_in: i32, quality: i32) {
         let test_item = test_update_single_item(
             Item {
@@ -196,7 +211,7 @@ mod tests {
         assert_eq!(test_item.quality, quality + 2);
     }
 
-    #[test_case("Backstage passes to a TAFKAL80ETC concert", 5, 0; "Backstage, 5, 0")]
+    #[test_case(CONCERT, 5, 0; "Backstage, 5, 0")]
     fn test_backstage_qlty_increases_below_5(name: &str, sell_in: i32, quality: i32) {
         let test_item = test_update_single_item(
             Item {
@@ -215,7 +230,7 @@ mod tests {
     }
 
     #[ignore = "this gives 4 but should be quality 0"]
-    #[test_case("Backstage passes to a TAFKAL80ETC concert", 5, 10; "Backstage, 5, 0")]
+    #[test_case(CONCERT, 5, 10; "Backstage, 5, 0")]
     fn test_backstage_qlty_drops_to_0(name: &str, sell_in: i32, quality: i32) {
         let test_item = test_update_single_item(
             Item {
@@ -234,10 +249,10 @@ mod tests {
     }
 
     // this doesn't work
-    #[test_case("Aged Brie", 5, 0; "Aged Brie, 5, 0")]
-    #[test_case("Aged Brie", 5, 1; "Aged Brie, 5, 1")]
-    #[test_case("Aged Brie", 5, 20; "Aged Brie, 5, 20")]
-    #[test_case("Aged Brie", 5, 30; "Aged Brie, 5, 30")]
+    #[test_case(BRIE, 5, 0; "Aged Brie, 5, 0")]
+    #[test_case(BRIE, 5, 1; "Aged Brie, 5, 1")]
+    #[test_case(BRIE, 5, 20; "Aged Brie, 5, 20")]
+    #[test_case(BRIE, 5, 30; "Aged Brie, 5, 30")]
     fn test_brie_qlty_increases_with_time(name: &str, sell_in: i32, quality: i32) {
         let test_item = test_update_single_item(
             Item {
@@ -278,9 +293,7 @@ mod tests {
         assert_eq!(test_item.quality, result);
     }
 
-    #[ignore = "this doesn't work"]
     #[test]
-    #[should_panic = "Quality can never  drop below 0"]
     fn test_drop_quality_below_0() {
         let test_item = test_update_single_item(
             Item {
@@ -295,15 +308,24 @@ mod tests {
         assert_eq!(test_item.quality, 0);
     }
 
-    #[ignore = "this doesn't work"]
     #[test]
-    #[should_panic = "Item should no be created this way"]
-    fn test_creation_item() {
-        // no item should have a quality above 50 (see below)
-        Item::new("something", 100, 51);
-        // except Sulfuras, which is exactly 80
-        Item::new("Sulfuras, Hand of Ragnaros", 100, 81);
+    #[should_panic(expected = "An item with negative quality cannot be created!")]
+    fn test_create_item_with_neg_quality() {
         // quality of an item can be never negative
         Item::new("Broken item", 100, -10);
+    }
+
+    #[test]
+    #[should_panic(expected = "Normal item cannot be created with quality greater than 50")]
+    fn test_create_item_with_quality_gt_50() {
+        // no item should have a quality above 50 (see below)
+        Item::new("something", 100, 51);
+    }
+
+    #[test]
+    #[should_panic(expected = "Sulfuras can only have quality equal to 80")]
+    fn test_create_sulfuras_with_qlty_gt_50() {
+        // except Sulfuras, which is exactly 80
+        Item::new(SULFURAS, 100, 81);
     }
 }
