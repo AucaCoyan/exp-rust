@@ -33,7 +33,7 @@ impl Item {
 
 impl Item {
     pub fn can_decrease_quality(self) -> bool {
-        self.quality > 0
+        self.quality > 0 && self.name != SULFURAS
     }
 }
 
@@ -52,40 +52,39 @@ const BRIE: &str = "Aged Brie";
 const CONCERT: &str = "Backstage passes to a TAFKAL80ETC concert";
 
 impl GildedRose {
-    pub fn new(items: Vec<Item>) -> GildedRose {
+    pub fn new(items: Vec<Item>) -> Self {
         GildedRose { items }
     }
 
     pub fn update_quality(&mut self) {
         for item in &mut self.items {
+            // quality
             if item.name != BRIE && item.name != CONCERT {
-                if item.quality > 0 && item.name != SULFURAS && item.clone().can_decrease_quality()
-                {
+                if item.clone().can_decrease_quality() {
                     item.quality -= 1;
                 }
             } else if item.quality < 50 {
                 item.quality += 1;
 
-                if item.name == CONCERT {
-                    if item.sell_in < 11 && item.quality < 50 {
+                if item.name == CONCERT && item.quality < 50 {
+                    if item.sell_in < 11 {
                         item.quality += 1;
                     }
 
-                    if item.sell_in < 6 && item.quality < 50 {
+                    if item.sell_in < 6 {
                         item.quality += 1;
                     }
                 }
             }
 
+            // sell_in
             if item.name != SULFURAS {
                 item.sell_in -= 1;
             }
 
             if item.sell_in < 0 {
-                if item.name == BRIE {
-                    if item.quality < 50 {
-                        item.quality += 1;
-                    }
+                if item.name == BRIE && item.quality < 50 {
+                    item.quality += 1;
                 } else if item.name != CONCERT {
                     if item.quality > 0 && item.name != SULFURAS {
                         item.quality -= 1;
