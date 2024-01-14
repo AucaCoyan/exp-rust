@@ -111,7 +111,7 @@ mod tests {
     }
 
     #[test]
-    fn test_sulfuras() {
+    fn test_sulfuras_name() {
         let sulfuras = vec![Item::new("Sulfuras, Hand of Ragnaros", 0, 0)];
         let mut rose = GildedRose::new(sulfuras);
         rose.update_quality();
@@ -124,7 +124,7 @@ mod tests {
     #[test_case("Not Backstage", 10, 1; "Not Backstage, 10, 1")]
     #[test_case("Not Backstage", 10, 10; "Not Backstage, 10, 10")]
     #[test_case("Not Backstage", 10, 100; "Not Backstage, 10, 100")]
-    fn test_multiple_cases_qlty_gt_0(name: &str, sell_in: i32, quality: i32) {
+    fn test_items_with_qlty_gt_0(name: &str, sell_in: i32, quality: i32) {
         let test_item = test_update_single_item(
             Item {
                 name: name.to_string(),
@@ -143,7 +143,7 @@ mod tests {
 
     #[test_case("Not Aged Brie", 10, 0; "Not Aged Brie, 10, 0")]
     #[test_case("Not Backstage", 10, 0; "Not Backstage, 10, 0")]
-    fn test_multiple_cases_qlty_is_0(name: &str, sell_in: i32, quality: i32) {
+    fn test_items_with_qlty_eq_0(name: &str, sell_in: i32, quality: i32) {
         let test_item = test_update_single_item(
             Item {
                 name: name.to_string(),
@@ -180,10 +180,8 @@ mod tests {
         assert_eq!(test_item.quality, quality);
     }
 
-    // this doesn't work
-    //#[test_case("Aged Brie", 10, 0; "Aged Brie, 10, 0")]
     #[test_case("Backstage passes to a TAFKAL80ETC concert", 10, 0; "Backstage, 10, 0")]
-    fn test_multiple_cases_items_qlty_increases_below_10(name: &str, sell_in: i32, quality: i32) {
+    fn test_backstage_qlty_increases_below_10(name: &str, sell_in: i32, quality: i32) {
         let test_item = test_update_single_item(
             Item {
                 name: name.to_string(),
@@ -198,6 +196,43 @@ mod tests {
         assert_eq!(test_item.name, name.to_string());
         assert_eq!(test_item.sell_in, sell_in - 1);
         assert_eq!(test_item.quality, quality + 2);
+    }
+
+    #[test_case("Backstage passes to a TAFKAL80ETC concert", 5, 0; "Backstage, 5, 0")]
+    fn test_backstage_qlty_increases_below_5(name: &str, sell_in: i32, quality: i32) {
+        let test_item = test_update_single_item(
+            Item {
+                name: name.to_string(),
+                sell_in,
+                quality,
+            },
+            1,
+        );
+        dbg!(&test_item.name);
+        dbg!(&test_item.sell_in);
+        dbg!(&test_item.quality);
+        assert_eq!(test_item.name, name.to_string());
+        assert_eq!(test_item.sell_in, sell_in - 1);
+        assert_eq!(test_item.quality, quality + 3);
+    }
+
+    #[ignore = "this gives 4 but should be quality 0"]
+    #[test_case("Backstage passes to a TAFKAL80ETC concert", 5, 10; "Backstage, 5, 0")]
+    fn test_backstage_qlty_drops_to_0(name: &str, sell_in: i32, quality: i32) {
+        let test_item = test_update_single_item(
+            Item {
+                name: name.to_string(),
+                sell_in,
+                quality,
+            },
+            5,
+        );
+        dbg!(&test_item.name);
+        dbg!(&test_item.sell_in);
+        dbg!(&test_item.quality);
+        assert_eq!(test_item.name, name.to_string());
+        assert_eq!(test_item.sell_in, sell_in - 1);
+        assert_eq!(test_item.quality, 0);
     }
 
     // this doesn't work
@@ -222,54 +257,55 @@ mod tests {
         assert_eq!(test_item.quality, quality + 1);
     }
 
-    // this doesn't work
-    //#[test_case("Aged Brie", 5, 0; "Aged Brie, 5, 0")]
-    #[test_case("Backstage passes to a TAFKAL80ETC concert", 5, 0; "Backstage, 5, 0")]
-    fn test_multiple_cases_items_qlty_increases_below_5(name: &str, sell_in: i32, quality: i32) {
+    #[test_case("Old Item", 5, 0, 0; "Aged Brie, 5, 0")]
+    #[test_case("Old Item", 5, 1, 0; "Aged Brie, 5, 1")]
+    #[test_case("Old Item", 5, 20, 5; "Aged Brie, 5, 20")]
+    #[test_case("Old Item", 5, 30, 15; "Aged Brie, 5, 30")]
+    fn test_drop_quality_faster_with_sell_in_lt_0(
+        name: &str,
+        sell_in: i32,
+        quality: i32,
+        result: i32,
+    ) {
         let test_item = test_update_single_item(
             Item {
                 name: name.to_string(),
                 sell_in,
                 quality,
             },
-            1,
+            10,
         );
-        dbg!(&test_item.name);
-        dbg!(&test_item.sell_in);
-        dbg!(&test_item.quality);
-        assert_eq!(test_item.name, name.to_string());
-        assert_eq!(test_item.sell_in, sell_in - 1);
-        assert_eq!(test_item.quality, quality + 3);
+        assert_eq!(test_item.name, "Old Item".to_string());
+        assert_eq!(test_item.sell_in, -5);
+        assert_eq!(test_item.quality, result);
     }
 
+    #[ignore = "this doesn't work"]
     #[test]
-    fn test_not_backstage_qlty_gt_0() {
+    #[should_panic = "Quality can never  drop below 0"]
+    fn test_drop_quality_below_0() {
         let test_item = test_update_single_item(
             Item {
-                name: "Not backstage".to_string(),
+                name: "Broken Item".to_string(),
                 sell_in: 10,
-                quality: 1,
+                quality: 3,
             },
-            1,
+            10,
         );
-        assert_eq!(test_item.name, "Not backstage".to_string());
-        assert_eq!(test_item.sell_in, 9);
+        assert_eq!(test_item.name, "Broken Item".to_string());
+        assert_eq!(test_item.sell_in, 0);
         assert_eq!(test_item.quality, 0);
     }
 
     #[ignore = "this doesn't work"]
     #[test]
-    #[should_panic]
+    #[should_panic = "Item should no be created this way"]
     fn test_creation_item() {
         // no item should have a quality above 50 (see below)
         Item::new("something", 100, 51);
-    }
-
-    #[ignore = "this doesn't work"]
-    #[test]
-    #[should_panic]
-    fn test_creation_sulfuras() {
         // except Sulfuras, which is exactly 80
         Item::new("Sulfuras, Hand of Ragnaros", 100, 81);
+        // quality of an item can be never negative
+        Item::new("Broken item", 100, -10);
     }
 }

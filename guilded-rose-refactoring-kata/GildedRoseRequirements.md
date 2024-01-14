@@ -13,18 +13,19 @@ we can begin selling a new category of items. First an introduction to our syste
 
 Pretty simple, right? Well this is where it gets interesting:
 
-- Once the sell by date has passed, Quality degrades twice as fast
-- The Quality of an item is never negative
-- "Aged Brie" actually increases in Quality the older it gets
-- The Quality of an item is never more than 50
-- "Sulfuras", being a legendary item, never has to be sold or decreases in Quality
-- "Backstage passes", like aged brie, increases in Quality as its SellIn value approaches;
-  Quality increases by 2 when there are 10 days or less and by 3 when there are 5 days or less but
-  Quality drops to 0 after the concert
+- [x] Once the sell by date has passed, Quality degrades twice as fast
+- [x] The Quality of an item is never negative
+- [x] "Aged Brie" actually increases in Quality the older it gets
+- [x] The Quality of an item is never more than 50
+- [x] "Sulfuras", being a legendary item, never has to be sold or decreases in Quality
+- [x] "Backstage passes", like aged brie, increases in Quality as its SellIn value approaches;
+- [x] Quality increases by 2 when there are 10 days or less 
+  - [x] and by 3 when there are 5 days or less
+  - [x] but Quality drops to 0 after the concert
 
 We have recently signed a supplier of conjured items. This requires an update to our system:
 
-- "Conjured" items degrade in Quality twice as fast as normal items
+- [ ] "Conjured" items degrade in Quality twice as fast as normal items
 
 Feel free to make any changes to the UpdateQuality method and add any new code as long as everything
 still works correctly. However, do not alter the Item class or Items property as those belong to the
@@ -32,5 +33,4 @@ goblin in the corner who will insta-rage and one-shot you as he doesn't believe 
 ownership (you can make the UpdateQuality method and Items property static if you like, we'll cover
 for you).
 
-Just for clarification, an item can never have its Quality increase above 50, however "Sulfuras" is a
-legendary item and as such its Quality is 80 and it never alters.
+- [x] Just for clarification, an item can never have its Quality increase above 50, however "Sulfuras" is a legendary item and as such its Quality is 80 and it never alters.
