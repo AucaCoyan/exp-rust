@@ -1,6 +1,7 @@
 use std::fmt::{self, Display};
 /// Item
 /// `sell_in` value is the number of days we have to sell the item
+#[derive(Clone)]
 pub struct Item {
     pub name: String,
     pub sell_in: i32,
@@ -14,6 +15,12 @@ impl Item {
             sell_in,
             quality,
         }
+    }
+}
+
+impl Item {
+    pub fn can_decrease_quality(self) -> bool {
+        self.quality > 0
     }
 }
 
@@ -33,44 +40,44 @@ impl GildedRose {
     }
 
     pub fn update_quality(&mut self) {
-        for i in 0..self.items.len() {
-            if self.items[i].name != "Aged Brie"
-                && self.items[i].name != "Backstage passes to a TAFKAL80ETC concert"
+        for item in &mut self.items {
+            if item.name != "Aged Brie" && item.name != "Backstage passes to a TAFKAL80ETC concert"
             {
-                if self.items[i].quality > 0 && self.items[i].name != "Sulfuras, Hand of Ragnaros" {
-                    self.items[i].quality -= 1;
+                if item.quality > 0
+                    && item.name != "Sulfuras, Hand of Ragnaros"
+                    && item.clone().can_decrease_quality()
+                {
+                    item.quality -= 1;
                 }
-            } else if self.items[i].quality < 50 {
-                self.items[i].quality += 1;
+            } else if item.quality < 50 {
+                item.quality += 1;
 
-                if self.items[i].name == "Backstage passes to a TAFKAL80ETC concert" {
-                    if self.items[i].sell_in < 11 && self.items[i].quality < 50 {
-                        self.items[i].quality += 1;
+                if item.name == "Backstage passes to a TAFKAL80ETC concert" {
+                    if item.sell_in < 11 && item.quality < 50 {
+                        item.quality += 1;
                     }
 
-                    if self.items[i].sell_in < 6 && self.items[i].quality < 50 {
-                        self.items[i].quality += 1;
+                    if item.sell_in < 6 && item.quality < 50 {
+                        item.quality += 1;
                     }
                 }
             }
 
-            if self.items[i].name != "Sulfuras, Hand of Ragnaros" {
-                self.items[i].sell_in -= 1;
+            if item.name != "Sulfuras, Hand of Ragnaros" {
+                item.sell_in -= 1;
             }
 
-            if self.items[i].sell_in < 0 {
-                if self.items[i].name == "Aged Brie" {
-                    if self.items[i].quality < 50 {
-                        self.items[i].quality += 1;
+            if item.sell_in < 0 {
+                if item.name == "Aged Brie" {
+                    if item.quality < 50 {
+                        item.quality += 1;
                     }
-                } else if self.items[i].name != "Backstage passes to a TAFKAL80ETC concert" {
-                    if self.items[i].quality > 0
-                        && self.items[i].name != "Sulfuras, Hand of Ragnaros"
-                    {
-                        self.items[i].quality -= 1;
+                } else if item.name != "Backstage passes to a TAFKAL80ETC concert" {
+                    if item.quality > 0 && item.name != "Sulfuras, Hand of Ragnaros" {
+                        item.quality -= 1;
                     }
                 } else {
-                    self.items[i].quality = 0;
+                    item.quality = 0;
                 }
             }
         }
