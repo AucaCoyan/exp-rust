@@ -34,6 +34,10 @@ pub struct GildedRose {
     pub items: Vec<Item>,
 }
 
+const SULFURAS: &str = "Sulfuras, Hand of Ragnaros";
+const BRIE: &str = "Aged Brie";
+const CONCERT: &str = "Backstage passes to a TAFKAL80ETC concert";
+
 impl GildedRose {
     pub fn new(items: Vec<Item>) -> GildedRose {
         GildedRose { items }
@@ -41,18 +45,15 @@ impl GildedRose {
 
     pub fn update_quality(&mut self) {
         for item in &mut self.items {
-            if item.name != "Aged Brie" && item.name != "Backstage passes to a TAFKAL80ETC concert"
-            {
-                if item.quality > 0
-                    && item.name != "Sulfuras, Hand of Ragnaros"
-                    && item.clone().can_decrease_quality()
+            if item.name != BRIE && item.name != CONCERT {
+                if item.quality > 0 && item.name != SULFURAS && item.clone().can_decrease_quality()
                 {
                     item.quality -= 1;
                 }
             } else if item.quality < 50 {
                 item.quality += 1;
 
-                if item.name == "Backstage passes to a TAFKAL80ETC concert" {
+                if item.name == CONCERT {
                     if item.sell_in < 11 && item.quality < 50 {
                         item.quality += 1;
                     }
@@ -63,17 +64,17 @@ impl GildedRose {
                 }
             }
 
-            if item.name != "Sulfuras, Hand of Ragnaros" {
+            if item.name != SULFURAS {
                 item.sell_in -= 1;
             }
 
             if item.sell_in < 0 {
-                if item.name == "Aged Brie" {
+                if item.name == BRIE {
                     if item.quality < 50 {
                         item.quality += 1;
                     }
-                } else if item.name != "Backstage passes to a TAFKAL80ETC concert" {
-                    if item.quality > 0 && item.name != "Sulfuras, Hand of Ragnaros" {
+                } else if item.name != CONCERT {
+                    if item.quality > 0 && item.name != SULFURAS {
                         item.quality -= 1;
                     }
                 } else {
