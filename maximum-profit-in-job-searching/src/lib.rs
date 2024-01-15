@@ -1,27 +1,42 @@
 use log::info;
+
+#[allow(dead_code)]
+#[derive(Debug)]
+struct Job {
+    start: i32,
+    end: i32,
+    profit: i32,
+}
+
+impl Job {
+    fn new(start: i32, end: i32, profit: i32) -> Self {
+        Job { start, end, profit }
+    }
+
+    fn can_be_combined(&self, job: &Job) -> bool {
+        !(job.start > self.start && job.start < self.end)
+            || (job.end > self.start && job.end < self.end)
+    }
+}
+
 pub struct Solution {}
 
 impl Solution {
     pub fn job_scheduling(start_time: Vec<i32>, end_time: Vec<i32>, profit: Vec<i32>) -> i32 {
-        // idx = 1
-        // let mut idx = 0;
-        let mut path: Vec<i32> = vec![];
-        // take 1 job
-        let range = 1..start_time.len();
-        for job_num in range {
-            info!("checking the job {job_num}");
-            // check the next job
-            //     does it overlap?
-            if start_time[job_num + 1] < end_time[job_num] {
-                //         yes: skip it
-                info!("the job {} starts before the job {}", job_num + 1, job_num);
-                continue;
-            } else {
-            };
-            //         no: add it to todo_list
-            //     continue
+        let main_job = Job::new(start_time[0], end_time[0], profit[0]);
+        for job_num in 1..start_time.len() {
+            let alternative_job = Job::new(start_time[job_num], end_time[job_num], profit[job_num]);
+            if main_job.can_be_combined(&alternative_job) {
+                println!(
+                    "it can be combined! start: {}, {}, end: {}, {}, profit: {}",
+                    main_job.start,
+                    alternative_job.start,
+                    main_job.end,
+                    alternative_job.end,
+                    (main_job.profit + alternative_job.profit)
+                );
+            }
         }
-        // finished? idx += 1 and continue
         1
     }
 }

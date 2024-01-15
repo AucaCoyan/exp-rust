@@ -1,4 +1,7 @@
 use maximum_profit_in_job_searching;
+
+// 1235. Maximum profit in job scheduling
+// https://leetcode.com/problems/maximum-profit-in-job-scheduling
 fn main() {
     env_logger::init();
     let start_time = vec![1, 2, 3, 3];
