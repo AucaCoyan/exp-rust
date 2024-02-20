@@ -59,3 +59,13 @@ fn main() {
 
     // Continued program logic goes here...
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn clap_cli_construction() {
+        app().debug_assert();
+    }
+}
