@@ -1,0 +1,16 @@
+espanso 
+
+USAGE:
+    espanso.exe [OPTIONS] [name] [SUBCOMMAND]
+
+ARGS:
+    <name>    Optional name to operate on
+
+OPTIONS:
+    -c, --config <FILE>    Sets a custom config file
+    -d, --debug            Turn debugging information on
+    -h, --help             Print help information
+
+SUBCOMMANDS:
+    help    Print this message or the help of the given subcommand(s)
+    test    does testing things
