@@ -1,8 +1,8 @@
 use clap::{arg, App};
 use std::path::Path;
 
-fn main() {
-    let matches = App::new("myapp")
+fn app() -> App<'static> {
+    App::new("espanso")
         .arg(arg!([name] "Optional name to operate on"))
         .arg(
             arg!(
@@ -21,7 +21,10 @@ fn main() {
                 .about("does testing things")
                 .arg(arg!(-l --list "lists test values")),
         )
-        .get_matches();
+}
+
+fn main() {
+    let matches = app().get_matches();
 
     // You can check the value provided by positional arguments, or option arguments
     if let Some(name) = matches.value_of("name") {
