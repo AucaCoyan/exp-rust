@@ -4,20 +4,20 @@ use simple_logger::SimpleLogger;
 use std::path::PathBuf;
 
 #[derive(Parser)]
-#[clap(author, version, about)]
+#[command(version, about, long_about = None)]
 struct Cli {
     /// Optional name to operate on
     name: Option<String>,
 
     /// Sets a custom config file
-    #[clap(short, long, parse(from_os_str), value_name = "FILE")]
+    #[arg(short, long, value_name = "FILE")]
     config: Option<PathBuf>,
 
     /// Turn debugging information on
-    #[clap(short, long, parse(from_occurrences))]
-    verbose: usize,
+    #[arg(short, long, action = clap::ArgAction::Count)]
+    verbose: u8,
 
-    #[clap(subcommand)]
+    #[command(subcommand)]
     command: Option<Commands>,
 }
 
@@ -29,6 +29,9 @@ enum Commands {
         #[clap(short, long)]
         list: bool,
     },
+
+    #[arg(try_get_matches_from("help"))]
+    Help,
 }
 
 fn main() {
@@ -71,7 +74,9 @@ fn main() {
     // error!("some error log");
 
     if let Some(handler) = &cli_instance.command {
+        Errork
     } else {
+        cli_instance.print_help()
     }
 
     // You can see how many times a particular flag or argument occurred
@@ -98,7 +103,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn clap_cli_construction() {
-        app().debug_assert();
+    fn verify_cli() {
+        use clap::CommandFactory;
+        Cli::command().debug_assert();
     }
 }
