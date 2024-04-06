@@ -6,3 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+clap = { version = "4.5.4", features = ["derive"] }
+dotenv = "0.15.0"
+gcloud-sdk = { version = "0.24.5", features = ["google-apps-script-type-calendar"] }
+google-calendar = "0.7.0"
+tokio = { version = "1.37.0", features = ["full"] }
