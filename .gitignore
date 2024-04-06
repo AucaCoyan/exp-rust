@@ -17,3 +17,5 @@ stackoverflow-survey/survey_results_schema.csv
 
 # distribution and build folders
 **/dist
+.env
+
