@@ -6,10 +6,10 @@ fn main() {
     let args = cli::Arguments::parse();
 
     match args.command {
-        cli::Command::Cmd { list } => println!("{list}"),
-        cli::Command::Edit {} => println!(""),
-        cli::Command::EnvPath {} => println!(""),
-        cli::Command::Install {} => println!(""),
+        cli::Command::Cmd { .. } => println!("something anything"),
+        cli::Command::Edit { list } => println!("{list}"),
+        cli::Command::EnvPath(..) => println!(""),
+        cli::Command::Install { .. } => println!(""),
         cli::Command::Log {} => println!(""),
         cli::Command::Match {} => println!(""),
         cli::Command::Migrate {} => println!(""),
