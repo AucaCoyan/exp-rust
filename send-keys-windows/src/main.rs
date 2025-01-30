@@ -4,6 +4,15 @@ use windows::Win32::UI::Input::KeyboardAndMouse::{
 };
 
 /// with the help of <https://gist.github.com/littletsu/d1c1b512d6843071144b7b89109a8de2>
+/// Windows API: SendInput
+/// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput
+/// `windows` crate
+/// https://microsoft.github.io/windows-docs-rs/doc/windows/
+/// windows crate mdbook
+/// https://kennykerr.ca/rust-getting-started/index.html
+/// feature flags search
+/// https://microsoft.github.io/windows-rs/features/#/0.59.0/search/sendinput
+///
 fn main() {
     println!("begin");
 
