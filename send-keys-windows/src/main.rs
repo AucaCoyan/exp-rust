@@ -16,6 +16,13 @@ use windows::Win32::UI::Input::KeyboardAndMouse::{
 fn main() {
     println!("begin");
 
+    let something = &"auca";
+    send_string(something);
+
+    println!("end!");
+}
+
+fn send_string(string: &str) {
     let input = [
         INPUT {
             r#type: INPUT_KEYBOARD,
@@ -48,5 +55,4 @@ fn main() {
         SendInput(&input, ipsize);
     }
 
-    println!("end!");
 }
