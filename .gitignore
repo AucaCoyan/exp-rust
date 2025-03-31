@@ -19,3 +19,6 @@ stackoverflow-survey/survey_results_schema.csv
 **/dist
 .env
 
+# macOS
+.DS_Store
+
