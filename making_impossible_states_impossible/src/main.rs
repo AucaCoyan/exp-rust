@@ -11,7 +11,11 @@ fn main() {
     println!("{valid_model:?}");
 
     let invalid_history = History {
-        questions: vec![],
+        first: Question {
+            prompt: "Name a US state",
+            response: Some(String::from("Delawere")),
+        },
+        others: vec![],
         current: Question {
             prompt: "Who are you?",
             response: None,

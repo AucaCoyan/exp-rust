@@ -1,4 +1,4 @@
-//! # Survey model v3.0
+//! # Survey model v4.0
 //! Instead of having a list of `prompts` and `responses`, you have a list of
 //! `Questions`
 //!
@@ -20,13 +20,18 @@
 //!
 //! Now, we want to add history, that is, go forward and back on the survey.
 //!
-//! Say: [History] is formed by a list of `questions` and one `current` question.
+//! If we change [History] to have a `first` and `others` in addition to
+//! `current`.
 //!
-//! The problem with this is that you can have an invalid history with no
-//! questions, for example:
+//! Now the problem is that you can have an question that is not in the history
+//! here:
 //! ```
 //!  let invalid_history = History {
-//!      questions: vec![],
+//!      first: Question {
+//!          prompt: "Name a US state",
+//!          response: Some(String::from("Delawere")),
+//!      },
+//!      rest: vec![],
 //!      current: Question {
 //!          prompt: "Who are you?",
 //!          response: None,
@@ -60,6 +65,7 @@ impl Default for Model {
 
 #[derive(Debug)]
 pub struct History {
-    pub questions: Vec<Question>,
+    pub first: Question,
+    pub others: Vec<Question>,
     pub current: Question,
 }
