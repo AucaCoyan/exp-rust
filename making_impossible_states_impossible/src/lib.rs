@@ -1,31 +1,54 @@
-//! # Survey model v1.0
-//! You have a list of `prompts` (list of `String`s)
-//! and a list of Responses (list of `String`s)
+//! # Survey model v3.0
+//! Instead of having a list of `prompts` and `responses`, you have a list of
+//! `Questions`
 //!
-//! The problem with this model is you can have a response without a
-//! corresponding question:
 //! Example:
 //! ```
-//!  let invalid_model = Model {
-//!      prompts: vec![String::new()],
-//!      responses: vec![Some(String::from("Yes!"))],
-//!  };
+//! use making_impossible_states_impossible::{Model, Question};
+//!
+//! let question = Question {
+//!     prompt: "what is your favourite color",
+//!     response: None,
+//! };
+//! let valid_model = Model {
+//!     questions: vec![question],
+//! };
+//! println!("{valid_model:?}");
 //! ```
 //!
-//! If you want to make invalid states unrepresentable, you need to couple
-//! prompts with responses
+//! And that's allright!
+//!
+//! Now, we want to add history, that is, go forward and back on the survey.
+//!
+//! Say: [History] is formed by a list of `questions` and one `current` question.
+//!
+//! The problem with this is that you can have an invalid history with no
+//! questions, for example:
+//! ```
+//!  let invalid_history = History {
+//!      questions: vec![],
+//!      current: Question {
+//!          prompt: "Who are you?",
+//!          response: None,
+//!      },
+//!  };
+//!  println!("{invalid_history:?}");
+//! ```
+
 #[derive(Debug)]
 pub struct Model {
-    pub prompts: Vec<String>,
-    pub responses: Vec<Option<String>>,
+    pub questions: Vec<Question>,
+}
+
+#[derive(Debug)]
+pub struct Question {
+    pub prompt: &'static str,
+    pub response: Option<String>,
 }
 
 impl Model {
     pub fn new() -> Self {
-        Model {
-            prompts: vec![],
-            responses: vec![],
-        }
+        Model { questions: vec![] }
     }
 }
 
@@ -33,4 +56,10 @@ impl Default for Model {
     fn default() -> Self {
         Self::new()
     }
+}
+
+#[derive(Debug)]
+pub struct History {
+    pub questions: Vec<Question>,
+    pub current: Question,
 }
