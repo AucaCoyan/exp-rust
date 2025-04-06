@@ -50,6 +50,8 @@
 //!   of questions, generate the [History]
 //!
 
+use std::vec;
+
 #[derive(Debug)]
 pub struct Model {
     pub questions: Vec<Question>,
@@ -89,5 +91,25 @@ impl History {
         questions.push(self.current.clone());
         questions.extend(self.remaining.iter().cloned());
         questions
+    }
+
+    pub fn forward(&mut self) {
+        if !self.remaining.is_empty() {
+            self.previous.push(self.current.clone());
+            self.current = self.remaining.clone().into_iter().nth(0).unwrap();
+            self.remaining.remove(0);
+        }
+    }
+
+    pub fn answer(&mut self, response: &str) {
+        self.current.response = Some(response.to_string());
+    }
+
+    pub fn new(starter_question: Question, remaining_questions: Vec<Question>) -> Self {
+        History {
+            previous: vec![],
+            current: starter_question,
+            remaining: remaining_questions,
+        }
     }
 }
