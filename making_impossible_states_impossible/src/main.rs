@@ -10,16 +10,16 @@ fn main() {
     };
     println!("{valid_model:?}");
 
-    let invalid_history = History {
-        first: Question {
-            prompt: "Name a US state",
-            response: Some(String::from("Delawere")),
-        },
-        others: vec![],
+    let valid_history = History {
+        previous: vec![],
         current: Question {
             prompt: "Who are you?",
             response: None,
         },
+        remaining: vec![],
     };
-    println!("{invalid_history:?}");
+    println!("{valid_history:?}");
+
+    let questions = valid_history.questions();
+    println!("Questions: {questions:?}");
 }

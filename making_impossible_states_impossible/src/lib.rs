@@ -37,15 +37,25 @@
 //!          response: None,
 //!      },
 //!  };
-//!  println!("{invalid_history:?}");
+//!  println!("{valid_history:?}");
 //! ```
+//!
+//! It's all fun and games, until you want to
+//!
+//! - [x] list of all the questions,
+//! - go to the next question,
+//! - go the previous question,
+//! - add an answer to the current question
+//! - create a history: given an initial question (starter `current`) and a list
+//!   of questions, generate the [History]
+//!
 
 #[derive(Debug)]
 pub struct Model {
     pub questions: Vec<Question>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Question {
     pub prompt: &'static str,
     pub response: Option<String>,
@@ -63,9 +73,21 @@ impl Default for Model {
     }
 }
 
+/// This data structure is known as Zip list, or
+/// [zipper (Wikipedia)](https://en.wikipedia.org/wiki/Zipper_(data_structure))
 #[derive(Debug)]
 pub struct History {
-    pub first: Question,
-    pub others: Vec<Question>,
+    pub previous: Vec<Question>,
     pub current: Question,
+    pub remaining: Vec<Question>,
+}
+
+impl History {
+    pub fn questions(&self) -> Vec<Question> {
+        let mut questions: Vec<Question> = Vec::new();
+        questions.extend(self.previous.iter().cloned());
+        questions.push(self.current.clone());
+        questions.extend(self.remaining.iter().cloned());
+        questions
+    }
 }
