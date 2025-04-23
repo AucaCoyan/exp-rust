@@ -1,0 +1,7 @@
+[package]
+name = "win-toast-notify-example"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+win-toast-notify = "0.1.6"
