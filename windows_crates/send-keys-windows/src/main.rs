@@ -1,6 +1,9 @@
-use windows::Win32::UI::Input::KeyboardAndMouse::{
-    SendInput, INPUT, INPUT_0, INPUT_KEYBOARD, KEYBDINPUT, KEYBD_EVENT_FLAGS, KEYEVENTF_KEYUP,
-    VK_LWIN,
+use windows::{
+    core::w,
+    Win32::UI::Input::KeyboardAndMouse::{
+        SendInput, INPUT, INPUT_0, INPUT_KEYBOARD, KEYBDINPUT, KEYBD_EVENT_FLAGS, KEYEVENTF_KEYUP,
+        VK_LWIN,
+    },
 };
 
 /// with the help of <https://gist.github.com/littletsu/d1c1b512d6843071144b7b89109a8de2>
@@ -15,6 +18,8 @@ use windows::Win32::UI::Input::KeyboardAndMouse::{
 ///
 fn main() {
     println!("begin");
+    let my_widestring = w!("some string");
+    println!("{my_widestring}");
 
     let something = &"auca";
     send_string(something);
@@ -54,5 +59,4 @@ fn send_string(string: &str) {
     unsafe {
         SendInput(&input, ipsize);
     }
-
 }
