@@ -6,5 +6,14 @@ edition = "2021"
 [dependencies]
 windows = { version = "0.58", features = [
     "Win32_Foundation",
+    "Win32_System_Diagnostics_ToolHelp",
+    "Win32_System_Threading",
+    "Win32_System_ProcessStatus",
     "Win32_UI_WindowsAndMessaging",
 ] }
+prometheus = "0.13"
+tokio = { version = "1", features = ["full"] }
+anyhow = "1.0.100"
+reqwest = { version = "0.11", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
