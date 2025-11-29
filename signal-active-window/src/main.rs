@@ -26,6 +26,8 @@ const DEFAULT_JOB_NAME: &str = "windows_active_window";
 /// From the PID, opens the process with read permissions
 /// and returns the parent *.exe
 fn get_executable_name(hwnd: HWND) -> Option<String> {
+    // SAFETY:
+    // the only way to get the window title is via Win32 API, which is unsafe
     unsafe {
         if hwnd.is_invalid() {
             return None;
@@ -68,6 +70,8 @@ fn get_executable_name(hwnd: HWND) -> Option<String> {
 
 /// Gets the executable name of the currently active foreground window
 fn get_active_window_executable() -> Option<String> {
+    // SAFETY:
+    // Wrapper for the Win32 API handler
     unsafe {
         let hwnd = GetForegroundWindow();
         get_executable_name(hwnd)
@@ -150,7 +154,7 @@ async fn push_metrics_to_gateway(
         .encode_to_string(&metric_families)
         .context("Failed to encode metrics")?;
 
-    let push_url = format!("{}/metrics/job/{}", pushgateway_url, job_name);
+    let push_url = format!("{pushgateway_url}/metrics/job/{job_name}");
 
     let client = reqwest::Client::new();
     let response = client
@@ -164,7 +168,7 @@ async fn push_metrics_to_gateway(
     if !response.status().is_success() {
         let status = response.status();
         let body = response.text().await.unwrap_or_default();
-        anyhow::bail!("Pushgateway returned error {}: {}", status, body);
+        anyhow::bail!("Pushgateway returned error {status}: {body}");
     }
 
     Ok(())
@@ -189,7 +193,7 @@ async fn main() -> anyhow::Result<()> {
 
     // Load previous state from disk
     if let Err(e) = load_metrics_state(&active_counter, &state_path).await {
-        eprintln!("Warning: Failed to load previous metrics state: {}", e);
+        eprintln!("Warning: Failed to load previous metrics state: {e}");
         println!("Starting with fresh metrics...");
     } else {
         println!("Restored metrics state from disk");
@@ -205,9 +209,9 @@ async fn main() -> anyhow::Result<()> {
         .unwrap_or(DEFAULT_PUSHGATEWAY_PORT);
     let job_name = env::var("JOB_NAME").unwrap_or_else(|_| DEFAULT_JOB_NAME.to_string());
 
-    let pushgateway_url = format!("http://{}:{}", pushgateway_host, pushgateway_port);
-    println!("Pushgateway URL: {}", pushgateway_url);
-    println!("Job name: {}", job_name);
+    let pushgateway_url = format!("http://{pushgateway_host}:{pushgateway_port}");
+    println!("Pushgateway URL: {pushgateway_url}");
+    println!("Job name: {job_name}");
     println!("Configure via environment variables: PUSHGATEWAY_HOST, PUSHGATEWAY_PORT, JOB_NAME");
 
     // Spawn periodic save task
@@ -247,7 +251,7 @@ async fn main() -> anyhow::Result<()> {
     let mut interval = time::interval(Duration::from_secs(1));
 
     tokio::select! {
-        _ = async move {
+        () = async move {
             loop {
                 interval.tick().await;
                 if let Some(executable) = get_active_window_executable() {
