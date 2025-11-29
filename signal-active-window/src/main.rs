@@ -174,8 +174,55 @@ async fn push_metrics_to_gateway(
     Ok(())
 }
 
+/// Load .env file and ensure its values take precedence over OS environment variables
+fn load_env_file() -> anyhow::Result<()> {
+    use std::fs;
+
+    let env_path = PathBuf::from(".env");
+    if !env_path.exists() {
+        return Ok(()); // No .env file, skip
+    }
+
+    let content = fs::read_to_string(&env_path).context("Failed to read .env file")?;
+
+    // Parse .env file line by line
+    for line in content.lines() {
+        let line = line.trim();
+
+        // Skip empty lines and comments
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+
+        // Parse KEY=VALUE format
+        if let Some((key, value)) = line.split_once('=') {
+            let key = key.trim();
+            let value = value.trim();
+
+            // Remove quotes if present
+            let value = value
+                .strip_prefix('"')
+                .and_then(|v| v.strip_suffix('"'))
+                .or_else(|| value.strip_prefix('\'').and_then(|v| v.strip_suffix('\'')))
+                .unwrap_or(value);
+
+            // Set the environment variable (this will override OS env vars)
+            env::set_var(key, value);
+        }
+    }
+
+    println!("Loaded .env file (values take precedence over OS environment variables)");
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    // Load .env file first (before reading any environment variables)
+    // This ensures .env values take precedence over OS environment variables
+    if let Err(e) = load_env_file() {
+        eprintln!("Warning: Failed to load .env file: {e}");
+    }
+
     println!("Active Window Monitor started. Tracking executable names...");
 
     let state_path = PathBuf::from(PERSISTENCE_FILE);
