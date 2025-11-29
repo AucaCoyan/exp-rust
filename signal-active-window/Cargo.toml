@@ -14,6 +14,6 @@ windows = { version = "0.58", features = [
 prometheus = "0.13"
 tokio = { version = "1", features = ["full"] }
 anyhow = "1.0.100"
-reqwest = { version = "0.11", features = ["json"] }
+reqwest = { version = "0.11", features = [] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

@@ -1,13 +1,10 @@
 use anyhow::Context;
-use axum::{extract::State, http::StatusCode, response::IntoResponse, routing::get, Router};
 use prometheus::{IntCounterVec, Registry, TextEncoder};
 use serde::{Deserialize, Serialize};
-use std::{
-    collections::HashMap, ffi::OsString, os::windows::ffi::OsStringExt, path::PathBuf, sync::Arc,
-};
+use std::{collections::HashMap, env, ffi::OsString, os::windows::ffi::OsStringExt, path::PathBuf};
 use tokio::{
     signal,
-    time::{self, Duration, Instant},
+    time::{self, Duration},
 };
 use windows::Win32::{
     Foundation::{CloseHandle, HWND, MAX_PATH},
@@ -18,7 +15,10 @@ use windows::Win32::{
 
 const PERSISTENCE_FILE: &str = "metrics_state.json";
 const SAVE_INTERVAL_SECS: u64 = 30; // Save to disk every 30 seconds
-const METRICS_PORT: u16 = 9090;
+const PUSH_INTERVAL_SECS: u64 = 15; // Push to Pushgateway every 15 seconds
+const DEFAULT_PUSHGATEWAY_HOST: &str = "localhost";
+const DEFAULT_PUSHGATEWAY_PORT: u16 = 9091;
+const DEFAULT_JOB_NAME: &str = "windows_active_window";
 
 /// Gets the executable name
 ///
@@ -138,22 +138,36 @@ async fn load_metrics_state(counter: &IntCounterVec, path: &PathBuf) -> anyhow::
     Ok(())
 }
 
-/// HTTP handler for /metrics endpoint
-async fn metrics_handler(State(registry): State<Arc<Registry>>) -> impl IntoResponse {
+/// Push metrics to Prometheus Pushgateway
+async fn push_metrics_to_gateway(
+    registry: &Registry,
+    pushgateway_url: &str,
+    job_name: &str,
+) -> anyhow::Result<()> {
     let encoder = TextEncoder::new();
     let metric_families = registry.gather();
-    match encoder.encode_to_string(&metric_families) {
-        Ok(metrics) => (StatusCode::OK, metrics),
-        Err(e) => (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            format!("Failed to encode metrics: {e}"),
-        ),
-    }
-}
+    let metrics_body = encoder
+        .encode_to_string(&metric_families)
+        .context("Failed to encode metrics")?;
 
-/// HTTP handler for /health endpoint
-async fn health_handler() -> impl IntoResponse {
-    (StatusCode::OK, "OK")
+    let push_url = format!("{}/metrics/job/{}", pushgateway_url, job_name);
+
+    let client = reqwest::Client::new();
+    let response = client
+        .put(&push_url)
+        .body(metrics_body)
+        .header("Content-Type", "text/plain; version=0.0.4")
+        .send()
+        .await
+        .context("Failed to send metrics to Pushgateway")?;
+
+    if !response.status().is_success() {
+        let status = response.status();
+        let body = response.text().await.unwrap_or_default();
+        anyhow::bail!("Pushgateway returned error {}: {}", status, body);
+    }
+
+    Ok(())
 }
 
 #[tokio::main]
@@ -181,29 +195,20 @@ async fn main() -> anyhow::Result<()> {
         println!("Restored metrics state from disk");
     }
 
-    let registry = Arc::new(registry);
+    // ----- Pushgateway configuration -----
+    // Get configuration from environment variables or use defaults
+    let pushgateway_host =
+        env::var("PUSHGATEWAY_HOST").unwrap_or_else(|_| DEFAULT_PUSHGATEWAY_HOST.to_string());
+    let pushgateway_port = env::var("PUSHGATEWAY_PORT")
+        .ok()
+        .and_then(|p| p.parse::<u16>().ok())
+        .unwrap_or(DEFAULT_PUSHGATEWAY_PORT);
+    let job_name = env::var("JOB_NAME").unwrap_or_else(|_| DEFAULT_JOB_NAME.to_string());
 
-    // ----- HTTP server setup -----
-    let app = Router::new()
-        .route("/metrics", get(metrics_handler))
-        .route("/health", get(health_handler))
-        .with_state(registry.clone());
-
-    let listener = tokio::net::TcpListener::bind(format!("192.168.0.8:{}", METRICS_PORT))
-        .await
-        .context("Failed to bind HTTP server")?;
-
-    println!(
-        "Prometheus exporter listening on http://192.168.0.8:{}/metrics",
-        METRICS_PORT
-    );
-
-    // Spawn HTTP server
-    let server_handle = tokio::spawn(async move {
-        axum::serve(listener, app)
-            .await
-            .context("HTTP server error")
-    });
+    let pushgateway_url = format!("http://{}:{}", pushgateway_host, pushgateway_port);
+    println!("Pushgateway URL: {}", pushgateway_url);
+    println!("Job name: {}", job_name);
+    println!("Configure via environment variables: PUSHGATEWAY_HOST, PUSHGATEWAY_PORT, JOB_NAME");
 
     // Spawn periodic save task
     let registry_for_save = registry.clone();
@@ -216,6 +221,24 @@ async fn main() -> anyhow::Result<()> {
                 eprintln!("Error saving metrics state: {e}");
             } else {
                 println!("Metrics state saved to disk");
+            }
+        }
+    });
+
+    // Spawn periodic push task
+    let registry_for_push = registry.clone();
+    let push_url = pushgateway_url.clone();
+    let job_name_for_push = job_name.clone();
+    let push_handle = tokio::spawn(async move {
+        let mut interval = time::interval(Duration::from_secs(PUSH_INTERVAL_SECS));
+        loop {
+            interval.tick().await;
+            if let Err(e) =
+                push_metrics_to_gateway(&registry_for_push, &push_url, &job_name_for_push).await
+            {
+                eprintln!("Error pushing metrics to Pushgateway: {e}");
+            } else {
+                println!("Metrics pushed to Pushgateway");
             }
         }
     });
@@ -237,21 +260,22 @@ async fn main() -> anyhow::Result<()> {
         _ = signal::ctrl_c() => {
             println!("\nShutting down gracefully...");
         },
-        result = server_handle => {
-            if let Err(e) = result {
-                eprintln!("HTTP server error: {e}");
-            }
-        },
     }
 
-    // Save final state before shutdown
+    // Save final state and push final metrics before shutdown
     println!("Saving final metrics state...");
     if let Err(e) = save_metrics_state(&registry, &state_path).await {
         eprintln!("Error saving final metrics state: {e}");
     }
 
-    // Cancel the save task
+    println!("Pushing final metrics to Pushgateway...");
+    if let Err(e) = push_metrics_to_gateway(&registry, &pushgateway_url, &job_name).await {
+        eprintln!("Error pushing final metrics: {e}");
+    }
+
+    // Cancel background tasks
     save_handle.abort();
+    push_handle.abort();
 
     println!("Shutdown complete");
     Ok(())
